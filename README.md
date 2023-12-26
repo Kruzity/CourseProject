@@ -17,6 +17,16 @@ To run the project correctly, you need to use the SQL script "CourseDBScript.sql
 
 ----------------------------
 
+What the server app looks like
+
 To enter in server application login details: admin, admin
 
-To enter is user application login details: test, test
+![image](https://github.com/Kruzity/CourseProject/assets/67079210/fe530683-6c0a-43d1-96dd-b59f5c49b0ed)
+
+What the user's app looks like
+
+To enter is user application login details: Maxlyn, AaBcD1
+
+![image](https://github.com/Kruzity/CourseProject/assets/67079210/058f98fb-71f0-40f0-a0d0-83b61a054630)
+
+
