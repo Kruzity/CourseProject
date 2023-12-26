@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style TargetType="RadioButton" x:Key="RadioButtonStyle">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid>
+                        
+                        <Border x:Name="border" Height="20" Width="80" Background="Gray">
+                            <Border.LayoutTransform>
+                                <SkewTransform AngleX="-50"/>
+                            </Border.LayoutTransform>
+                        </Border>
+                        
+                        <ContentPresenter HorizontalAlignment="Center"/>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="border" Property="Border.Background" Value="DarkSlateGray"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

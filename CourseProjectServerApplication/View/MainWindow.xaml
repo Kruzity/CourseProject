@@ -1,0 +1,579 @@
+﻿<Window x:Class="CourseProjectServerApplication.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:local="clr-namespace:CourseProjectServerApplication.View"
+        xmlns:vm="clr-namespace:CourseProjectServerApplication.ViewModel"
+        mc:Ignorable="d"
+        Height="600" 
+        Width="1000"
+        MinWidth="1000"
+        MinHeight="600"
+        x:Name="win"
+        KeyDown="win_KeyDown"
+        WindowState="Maximized"
+        Title="Dispatcher application"
+        >
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction Command="{Binding OnClose}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <vm:StringConverter x:Key="StringConverter"/>
+        <BooleanToVisibilityConverter x:Key="boolToVis"/>
+        <vm:StateToColorConverter x:Key="StateColorConverter"/>
+    </Window.Resources>
+
+    <Grid x:Name="main_grid">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="80"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="122"/>
+                <ColumnDefinition Width="130"/>
+                <ColumnDefinition Width="180"/>
+                <ColumnDefinition Width="180"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Row="0" Grid.ColumnSpan="6" Background="{StaticResource green3}"/>
+
+
+
+            <TextBlock Text="CRM" Margin="15,0,0,0" Grid.Column="0" Foreground="White" VerticalAlignment="Center" FontSize="40" FontFamily="{StaticResource Regular}"/>
+
+            <CheckBox Name="Filter_btn" Grid.Column="1"   VerticalAlignment="Center" Unchecked="Filter_btn_Unchecked">
+                <CheckBox.Template>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Name="border" Padding="3" Width="34" Height="20" Background="#D7D7D7" CornerRadius="10">
+                                <Ellipse Name="ellipse" Height="14" Width="14" Fill="#2E2E2E" Opacity="0.6" HorizontalAlignment="Left"/>
+                            </Border>
+                            <TextBlock Margin="10,0,0,0" Foreground="White" FontFamily="{StaticResource Semibold}" Text="Filter by: " FontSize="20"/>
+                        </StackPanel>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="ellipse" Property="HorizontalAlignment" Value="Right"/>
+                                <Setter TargetName="ellipse" Property="Ellipse.Fill" Value="#FFFFFF"/>
+                                <Setter TargetName="border" Property="Background" Value="#6FD7A4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </CheckBox.Template>
+            </CheckBox>
+
+            <StackPanel x:Name="StateMenu_sp" Grid.Column="2" Grid.RowSpan="2" Panel.ZIndex="1" VerticalAlignment="Top" Margin="0,27,0,0" >
+                <CheckBox x:Name="state_btn" IsEnabled="{Binding ElementName=Filter_btn, Path=IsChecked}" Width="130" Content="State"  FontFamily="{StaticResource Regular}">
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox">
+                            <Setter Property="FontSize" Value="20"/>
+
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="CheckBox">
+                                        <ContentPresenter HorizontalAlignment="Center"/>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="LightGray"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
+
+                <ListBox x:Name="states_lb" SelectionChanged="states_lb_SelectionChanged" BorderBrush="Transparent" BorderThickness="0"  Width="130"  SelectedItem="{Binding ViewState, Mode=TwoWay}" ItemsSource="{Binding ViewStatesList}" Visibility="{Binding ElementName=state_btn, Path=IsChecked, Converter={StaticResource boolToVis}}">
+
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding ShowRequests}" CommandParameter="{Binding ElementName=states_lb, Path=SelectedItem}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" x:Name="sp">
+                                <Ellipse Margin="10" Width="16" Height="16" Fill="Green"/>
+                                <TextBlock FontFamily="{StaticResource Regular}" VerticalAlignment="Center" Text="{Binding}"/>
+                            </StackPanel>
+                        </DataTemplate>
+
+
+                    </ListBox.ItemTemplate>
+
+
+                    <ListBox.Template>
+                        <ControlTemplate TargetType="ListBox">
+                            <Grid>
+                                <Border Background="Black" CornerRadius="5">
+                                    <Border.Effect>
+                                        <BlurEffect Radius="10"/>
+                                    </Border.Effect>
+
+
+                                </Border>
+                                <Border Background="White" CornerRadius="5">
+                                    <ItemsPresenter/>
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </ListBox.Template>
+                </ListBox>
+
+
+            </StackPanel>
+
+            <StackPanel Width="180" Grid.Column="3" Grid.RowSpan="2" Margin="0,27,0,0" Panel.ZIndex="1">
+                <CheckBox x:Name="datereq_btn" IsEnabled="{Binding ElementName=Filter_btn, Path=IsChecked}" FontFamily="{StaticResource Regular}" Content="Date Requested">
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox">
+                            <Setter Property="FontSize" Value="20"/>
+
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="CheckBox">
+                                        <ContentPresenter HorizontalAlignment="Center"/>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="LightGray"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
+                
+                <Grid Margin="0,3,0,0" Visibility="{Binding ElementName=datereq_btn, Path=IsChecked, Converter={StaticResource boolToVis}}">
+                    <Border Background="Black" CornerRadius="6">
+                        <Border.Effect>
+                            <BlurEffect Radius="20"/>
+                        </Border.Effect>
+                    </Border>
+                    <Border Background="White" CornerRadius="6">
+                        <StackPanel Margin="0,4">
+                            <Calendar Language="en-US" Name="datereq_cal" IsTodayHighlighted="True" SelectionMode="MultipleRange" Background="Transparent" BorderThickness="0">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectedDatesChanged">
+                                        <i:InvokeCommandAction Command="{Binding RequestedDatesFilter}" CommandParameter="{Binding ElementName=datereq_cal,Path=SelectedDates}"/>
+                                        
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Calendar>
+                            <Border Height="1" Background="#F1F1F1" Margin="0,8"/>
+                            <Button Height="18" Margin="8,0">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Grid>
+                                            <Image Height="14" Width="14" Margin="2,0,0,0" HorizontalAlignment="Left" Source="../Images/variant=today.png"/>
+                                            <TextBlock Text="Today" Margin="24,0,0,0"/>
+                                            <TextBlock Text="Wed, Nov 22" Foreground="#5C5C5C" HorizontalAlignment="Right" Margin="0,0,2,0"/>
+
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <Button Height="18" Margin="8">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Grid>
+                                            <Image Height="14" Width="14" Margin="2,0,0,0" HorizontalAlignment="Left" Source="../Images/variant=yestarday.png"/>
+                                            <TextBlock Text="Yesterday" Margin="24,0,0,0"/>
+                                            <TextBlock Text="Mon, Nov 21" Foreground="#5C5C5C" HorizontalAlignment="Right" Margin="0,0,2,0"/>
+
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+            </StackPanel>
+
+            <StackPanel Width="180" Grid.Column="4" Grid.RowSpan="2" Margin="0,27,0,0" Panel.ZIndex="1">
+                <CheckBox x:Name="datedone_btn" IsEnabled="{Binding ElementName=Filter_btn, Path=IsChecked}" FontFamily="{StaticResource Regular}" Content="Date Done">
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox">
+                            <Setter Property="FontSize" Value="20"/>
+
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="CheckBox">
+                                        <ContentPresenter HorizontalAlignment="Center"/>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="LightGray"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
+                <Grid Margin="0,3,0,0" Visibility="{Binding ElementName=datedone_btn, Path=IsChecked, Converter={StaticResource boolToVis}}">
+                    <Border Background="Black" CornerRadius="6">
+                        <Border.Effect>
+                            <BlurEffect Radius="20"/>
+                        </Border.Effect>
+                    </Border>
+                    <Border Background="White" CornerRadius="6">
+                        <StackPanel Margin="0,4">
+                            <Calendar Language="en-US" Name="datedone_cal" SelectionMode="MultipleRange" Background="Transparent" BorderThickness="0">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectedDatesChanged">
+                                        <i:InvokeCommandAction Command="{Binding DoneDatesFilter}" CommandParameter="{Binding ElementName=datedone_cal,Path=SelectedDates}"/>
+                                        
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </Calendar>
+                            <Border Height="1" Background="#F1F1F1" Margin="0,8"/>
+                            <Button Height="18" Margin="8,0">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Grid>
+                                            <Image Height="14" Width="14" Margin="2,0,0,0" HorizontalAlignment="Left" Source="../Images/variant=today.png"/>
+                                            <TextBlock Text="Today" Margin="24,0,0,0"/>
+                                            <TextBlock Text="Wed, Nov 22" Foreground="#5C5C5C" HorizontalAlignment="Right" Margin="0,0,2,0"/>
+
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <Button Height="18" Margin="8">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Grid>
+                                            <Image Height="14" Width="14" Margin="2,0,0,0" HorizontalAlignment="Left" Source="../Images/variant=yestarday.png"/>
+                                            <TextBlock Text="Yesterday" Margin="24,0,0,0"/>
+                                            <TextBlock Text="Mon, Nov 21" Foreground="#5C5C5C" HorizontalAlignment="Right" Margin="0,0,2,0"/>
+
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+            </StackPanel>
+            
+            <Border x:Name="Search_border" Grid.Column="5"  CornerRadius="8" Background="White" Height="30" MaxWidth="300" VerticalAlignment="Center" Padding="0,5,0,5">
+                <StackPanel x:Name="Search_sp" Orientation="Horizontal">
+                    <Image x:Name="Search_icon" Source="../Images/charm_search.png" Stretch="Uniform" HorizontalAlignment="Left" Margin="5,0,10,0"/>
+                    <Grid>
+                        <TextBlock Name="searchText_tblock" FontSize="17"  Text="ID, Name, Title, Message" FontFamily="{StaticResource Regular}" VerticalAlignment="Top">
+                            <TextBlock.Foreground>
+                                <SolidColorBrush Color="#2e2e2e" Opacity="0.2"/>
+                            </TextBlock.Foreground>
+                        </TextBlock>
+                        <TextBox Name="search_tbox" Text="{Binding SeachableText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="search_tbox_TextChanged" FontSize="17" BorderThickness="0" Background="Transparent"  FontFamily="{StaticResource Regular}" VerticalAlignment="Top">
+                            
+                        </TextBox>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Grid x:Name="RequestsLb_grid" Grid.Row="1" Grid.ColumnSpan="6">
+
+                <ListView SelectionChanged="lv_SelectionChanged" SizeChanged="lv_SizeChanged" Name="lv" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="1" ItemsSource="{Binding RequestList, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding MarkAsViewed}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="True">
+                            <GridView.Columns >
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="RequestId"/>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Grid.Column="0" Style="{DynamicResource br_2}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding RequestId}" Foreground="#07B695" FontFamily="{StaticResource Bold}"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="UserId"/>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Grid.Column="1" Style="{DynamicResource br_2}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding UserId}"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="Title"/>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{DynamicResource br_2}" Margin="15,0" CornerRadius="10" Background="#07B695" Padding="12,2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                <TextBlock  Text="{Binding Title}" TextTrimming="CharacterEllipsis" Foreground="White"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="Message"/>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{DynamicResource br_2}" Margin="15,4" Padding="10,5,8,5" CornerRadius="15">
+
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="#B6B6B6" Opacity="0.6"/>
+                                                </Border.Background>
+
+                                                <TextBlock  Text="{Binding Message}" Height="35" TextWrapping="Wrap"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="State"/>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{DynamicResource br_2}"  HorizontalAlignment="Left" VerticalAlignment="Center" Padding="12,2" CornerRadius="10" Background="{Binding State, Converter={StaticResource StateColorConverter}}">
+                                                <TextBlock Text="{Binding State, Converter={StaticResource StringConverter}}"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="ReqestedDate"/>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding RequestedDate}" FontFamily="{StaticResource Bold}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="DoneDate"/>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding DoneDate}" FontFamily="{StaticResource Bold}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView.Columns>
+
+                        </GridView>
+                    </ListView.View>
+
+                    <ListView.Resources>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0"/>
+                        </Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="FontSize" Value="16"/>
+                            <Setter Property="FontFamily" Value="{StaticResource Regular}"/>
+                            <Setter Property="Grid.Row" Value="1"/>
+                            <Setter Property="TextWrapping" Value="Wrap"/>
+                        </Style>
+                        <Style x:Key="br_2" TargetType="Border">
+
+                        </Style>
+                    </ListView.Resources>
+                </ListView>
+            </Grid>
+
+            
+        </Grid>
+
+        <Border x:Name="dark_brd" Background="Black" Opacity="0.0">
+
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=IsItemSelected}" Value="true">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding Path=IsItemSelected}" Value="false">
+                            <Setter Property="Visibility" Value="Hidden"/>
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding Path=IsItemSelected}" Value="true">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             To="0.7"
+                                                             Duration="0:0:0.25"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             To="0.0"
+                                                             Duration="0:0:0.25"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+        </Border>
+
+        <Grid x:Name="FloatRequest_grid">
+            <Grid x:Name="gr1" Height="500" Width="900" Margin="0,450,0,0" Opacity="0" Visibility="{Binding IsItemSelected, Converter={StaticResource boolToVis}}">
+
+                <Button Click="close_btn_Click" x:Name="close_btn" Width="40" Height="40" Panel.ZIndex="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="25">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Grid>
+                                            <Ellipse Height="36" Width="36">
+                                                <Ellipse.Fill>
+                                                    <ImageBrush ImageSource="../Images/close_btn.png"/>
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                    
+                    
+                </Button>
+
+                <Border Background="White" CornerRadius="10" BorderBrush="{StaticResource green2}" BorderThickness="4"/>
+
+                <StackPanel Margin="50">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="UserId:" Style="{StaticResource TitlesStyle_tb}" FontFamily="{StaticResource Semibold}"/>
+                        <TextBlock FontFamily="{StaticResource Regular}" Text="{Binding SelectedItem.UserId, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ValueStyle_tb}"/>
+
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,30,0,0">
+                        <TextBlock FontFamily="{StaticResource Semibold}" Text="Title:" Style="{StaticResource TitlesStyle_tb}"/>
+                        <TextBlock FontFamily="{StaticResource Regular}" Text="{Binding SelectedItem.Title, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ValueStyle_tb}"/>
+
+                    </StackPanel>
+
+                    <Grid Margin="0,30,0,0" Height="290">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Request" Width="80" Style="{StaticResource TitlesStyle_tb}" FontFamily="{StaticResource Semibold}"/>
+                            <Border MaxHeight="190" Margin="0,20,0,0" Background="#D9D9D9" CornerRadius="10" Padding="20">
+                                <TextBlock FontSize="20" TextWrapping="Wrap" Text="{Binding SelectedItem.Message, UpdateSourceTrigger=PropertyChanged}" FontFamily="{StaticResource Regular}"/>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Answer" Width="80" Style="{StaticResource TitlesStyle_tb}" FontFamily="{StaticResource Semibold}"/>
+                            <Border MaxHeight="170" Margin="0,20,0,0" Background="#D9D9D9" CornerRadius="10" Padding="20">
+                                <Grid>
+                                    <TextBox x:Name="answer_text" Background="Transparent" BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Visible" FontSize="20" TextWrapping="Wrap" Text="" FontFamily="{StaticResource Regular}"/>
+                                    <Button x:Name="sendAnswer_button" Click="sendAnswer_button_Click"  Command="{Binding SendAnswer}" CommandParameter="{Binding ElementName=answer_text, Path=Text}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="40" Width="40" Content="send" Opacity="0.5">
+
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Width="200" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                            <TextBlock FontFamily="{StaticResource Regular}" Text="{Binding SelectedItem.RequestedDate, Converter={StaticResource StringConverter}}" FontSize="18"/>
+                            <TextBlock FontFamily="{StaticResource Regular}" Text="{Binding SelectedItem.DoneDate, Converter={StaticResource StringConverter}}" FontSize="18"/>
+                        </StackPanel>
+
+                        <ComboBox x:Name="State_cb" Text="{Binding SelectedItem.State, Converter={StaticResource StringConverter}}" FontFamily="{StaticResource Regular}" Style="{StaticResource Custom_ComboBox}" Grid.Column="2" ItemsSource="{Binding StateList}" Width="213" Height="50" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="SelectionChanged">
+                                    <i:InvokeCommandAction Command="{Binding EditRequestCommand}" CommandParameter="{Binding ElementName=State_cb, Path=SelectedItem}"/>
+
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </ComboBox>
+
+                    </Grid>
+                </StackPanel>
+
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsItemSelected, UpdateSourceTrigger=PropertyChanged}" Value="true">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ThicknessAnimation
+                                                             Storyboard.TargetProperty="Margin"
+                                                             To="0,0,0,0"
+                                                             Duration="0:0:0.25"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             To="1"
+                                                             Duration="0:0:0.25"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ThicknessAnimation
+                                                             Storyboard.TargetProperty="Margin"
+                                                             To="0,450,0,0"
+                                                             Duration="0:0:0.25"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.25"/>
+
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+            </Grid>
+
+        </Grid>
+    </Grid>
+</Window>

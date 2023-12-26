@@ -1,0 +1,346 @@
+﻿<Window x:Class="CourseProjectUserApplication.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CourseProjectUserApplication.View"
+        xmlns:vm="clr-namespace:CourseProjectUserApplication.ViewModel"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        mc:Ignorable="d"
+        Title="User application" 
+        Height="600" 
+        Width="1000"
+        MinWidth="1000"
+        MinHeight="600"
+        WindowState="Maximized">
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closed">
+            <i:InvokeCommandAction Command="{Binding OnClose}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <vm:StringConverter x:Key="stringConverter"/>
+        <vm:StateToColorConverter x:Key="StateToColorConverter"/>
+        <vm:VisConverter x:Key="VisConverter"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="5*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="130"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Border Background="#D9D9D9" Grid.RowSpan="3"/>
+
+            <Border x:Name="SearchButton_border" Background="White" Margin="60,50,60,30" CornerRadius="20" >
+                <Grid>
+                    <Image Height="26" Width="26" Source="../Images/charm_search.png" Stretch="Uniform" HorizontalAlignment="Right" Margin="0,0,11,0"/>
+                    <Border Padding="23,13,40,13">
+                        <Grid>
+                            <TextBlock x:Name="search_tblock" Text="Search request" FontSize="18" Foreground="#7B7979"/>
+                            <TextBox Name="search_tbox" TextChanged="search_tbox_TextChanged" FontSize="18"  Background="Transparent" BorderThickness="0">
+                                
+                            </TextBox>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Grid x:Name="requests_grid" Grid.Row="1">
+                <ListBox x:Name="requests_lb" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" Margin="0,20,0,165" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Visible" BorderThickness="0" ItemsSource="{Binding RequestList, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Background="Transparent">
+                    <ListBox.Resources>
+                        <Style TargetType="ScrollBar" BasedOn="{StaticResource ScrollBar_Style}">
+                            <Setter Property="Width" Value="10"/>
+                        </Style>
+                    </ListBox.Resources>
+
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding GetAnswers}"/>
+                            <i:InvokeCommandAction Command="{Binding MarkAsReadedAnswers}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid x:Name="listbox_grid" Height="76" Width="{Binding ElementName=requests_grid, Path=ActualWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="9*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Height="20" Margin="5,0" Background="{Binding State, Converter={StaticResource StateToColorConverter}}" CornerRadius="5">
+                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding UnreadedMessages, UpdateSourceTrigger=PropertyChanged}" Foreground="Black" FontWeight="Bold" FontSize="15"/>
+                                </Border>
+
+                                
+                                
+                                <Border Grid.Column="1" BorderThickness="0,1,0,0" BorderBrush="#7B7979">
+                                    <Grid Margin="0,20">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Title: " FontSize="20"/>
+                                            <TextBlock Text="{Binding Title}" FontSize="20"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Margin" Value="0,0,0,0"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Width" Value="{Binding ElementName=requests_grid, Path=ActualWidth}"/>
+
+
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="border" Background="Transparent">
+                                            <ContentPresenter/>
+                                        </Border>
+
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="ListBoxItem.IsSelected" Value="True">
+                                                <Setter TargetName="border" Property="Border.Background">
+                                                    <Setter.Value>
+                                                        <SolidColorBrush Color="#6FD7A4" Opacity="0.4"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+                <Button x:Name="new_btn" Click="new_btn_Click" VerticalAlignment="Bottom" FontSize="24" Foreground="White" Margin="0,0,0,45" Height="75" Width="260" Content="New Requests">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Name="btn" CornerRadius="20" Background="#6FD7A4">
+                                <ContentPresenter Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+
+
+
+            <Grid x:Name="userState_grid" Grid.Column="2">
+                <Border Background="White">
+                    <StackPanel Margin="0,0,20,0" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="20" Margin="0,0,20,0"/>
+                        <Image Source="../Images/mingcute_user-3-fill.png" Height="56"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="1" Grid.Column="1">
+                <Grid Visibility="{Binding ElementName=requests_lb, Path=SelectedItem, Converter={StaticResource VisConverter}}" Margin="90,0,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Title: " FontSize="32"/>
+                        <TextBlock Text="{Binding SelectedItem.Title, UpdateSourceTrigger=PropertyChanged}" FontSize="32"/>
+                    </StackPanel>
+
+                    <ScrollViewer x:Name="body_sv" Grid.Row="1" HorizontalScrollBarVisibility="Hidden">
+                        <Grid Width="{Binding ElementName=body_sv, Path=ActualWidth}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="9*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid x:Name="body_grid">
+                                <StackPanel Width="{Binding ElementName=body_grid, Path=ActualWidth}">
+                                    <TextBlock Text="Request" FontSize="32"/>
+                                    <Border Padding="30,20" CornerRadius="10" Margin="0,10,0,0">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="#D7D7D7" Opacity="0.6"/>
+                                        </Border.Background>
+                                        <StackPanel>
+                                            <TextBlock FontSize="20" TextWrapping="Wrap" Text="{Binding SelectedItem.Message}"/>
+                                            <TextBlock FontSize="20" Margin="0,10,0,0" Text="{Binding SelectedItem.RequestedDate}" HorizontalAlignment="Right"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <TextBlock Text="Answer" FontSize="32" Margin="0,40,0,0"/>
+                                    <ListBox ScrollViewer.HorizontalScrollBarVisibility="Hidden" BorderThickness="0" IsEnabled="False" ItemsSource="{Binding AnswersList}" Margin="0,0,0,0">
+
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border x:Name="brd" Padding="30,20" Width="{Binding ElementName=body_grid, Path=ActualWidth}" CornerRadius="10" Margin="0,10,0,0">
+                                                    <Border.Background>
+                                                        <SolidColorBrush Color="#6FD7A4" Opacity="0.6"/>
+                                                    </Border.Background>
+
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Message}" FontSize="20" HorizontalAlignment="Left" TextWrapping="Wrap"/>
+                                                        <TextBlock Text="{Binding Date}" HorizontalAlignment="Right" FontSize="20"/>
+                                                    </StackPanel>
+
+                                                </Border>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="ListBoxItem">
+                                                            <Grid>
+                                                                <ContentPresenter/>
+                                                            </Grid>
+
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsEnabled" Value="False">
+                                                                    <Setter Property="Foreground" Value="Black"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                                </StackPanel>
+
+                            </Grid>
+
+                        </Grid>
+
+                        <ScrollViewer.Resources>
+                            <Style TargetType="ScrollBar" BasedOn="{StaticResource ScrollBar_Style}">
+                                <Setter Property="Margin" Value="0,0,20,0"/>
+                            </Style>
+                        </ScrollViewer.Resources>
+                    </ScrollViewer>
+
+
+                    <Grid Grid.Row="2" Margin="0,0,37,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="14*"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock Text="State: " FontSize="20" Foreground="#6FD7A4" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding SelectedItem.State, Converter={StaticResource stringConverter}}" FontSize="20" Foreground="#6FD7A4" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+            </Grid>
+
+            <Border x:Name="dark_border" Background="Black" Grid.RowSpan="3" Grid.ColumnSpan="2" Opacity="0" Visibility="Hidden"/>
+        </Grid>
+
+        <Border x:Name="floatNewRequest_border" Background="White" CornerRadius="20" Height="500" Width="900" Margin="0,400,0,0" Opacity="0" Visibility="Hidden">
+            <Grid>
+                <Image Source="../Images/back.png" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="11,76,0,0" Width="200" Height="240"/>
+                <Image Source="../Images/back1.png" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,75,50" Width="110" Height="110"/>
+
+                <Button Click="close_btn_Click"  x:Name="close_btn" Width="40" Height="40" Panel.ZIndex="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="30">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Grid>
+                                            <Ellipse Height="36" Width="36">
+                                                <Ellipse.Fill>
+                                                    <ImageBrush ImageSource="../Images/close_btn.png"/>
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+
+
+                </Button>
+
+                <StackPanel HorizontalAlignment="Center" Margin="0,55,0,0">
+                    <TextBlock Text="Create Request" FontSize="32" HorizontalAlignment="Center"/>
+
+                    <Grid Margin="0,30,0,0" Height="56" Width="685" MaxWidth="685">
+                        <Border Panel.ZIndex="1" Padding="25,16" CornerRadius="20" Background="#EFEFEF">
+                            <Grid>
+                                <TextBlock Name="title_tblock" FontSize="20" Text="Request title..."/>
+                                <TextBox Name="title_tbox" Text="{Binding NewRequest.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="title_tbox_TextChanged" FontSize="20" Background="Transparent" BorderThickness="0">
+
+                                </TextBox>
+                            </Grid>
+                        </Border>
+                        <Border Background="Black">
+                            <Border.Effect>
+                                <BlurEffect Radius="30"/>
+                            </Border.Effect>
+                        </Border>
+                    </Grid>
+
+                    <Grid Margin="0,25,0,0" MaxWidth="685" Width="685">
+
+                        <Border Panel.ZIndex="1" MaxHeight="180" Padding="25,16" CornerRadius="20" Background="#EFEFEF">
+                            <Grid>
+                                <TextBlock Name="message_tblock" FontSize="20" Text="Request Message..."/>
+                                <TextBox x:Name="message_tbox" Text="{Binding NewRequest.Message, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="message_tbox_TextChanged" TextWrapping="Wrap" FontSize="20" Background="Transparent" BorderThickness="0">
+
+                                </TextBox>
+                            </Grid>
+                        </Border>
+                        <Border Background="Black">
+                            <Border.Effect>
+                                <BlurEffect Radius="30" KernelType="Gaussian"/>
+                            </Border.Effect>
+                        </Border>
+                    </Grid>
+
+                    <TextBlock Text="{Binding ErrorMessage, UpdateSourceTrigger=PropertyChanged}" Foreground="Black"/>
+
+                    <Border Margin="0,30,0,0" Width="172" Height="52">
+                        <Button Click="send_btn_Click" Command="{Binding NewRequestCommand}" Name="send_btn" Foreground="#FFFFFF" Content="Send" FontSize="20">
+                        
+                            <Button.Template>
+                                <ControlTemplate>
+                                    <Border Name="btn" CornerRadius="20" Background="LightGray">
+                                        <ContentPresenter Content="Send" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsEnabled" Value="True">
+                                            <Setter TargetName="btn" Property="Border.Background" Value="#6FD7A4"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Border>
+
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
