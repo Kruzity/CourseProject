@@ -15,5 +15,8 @@ Technologies involved:
 
 To run the project correctly, you need to use the SQL script "CourseDBScript.sql" to get started
 
+----------------------------
+
 To enter in server application login details: admin, admin
+
 To enter is user application login details: test, test
